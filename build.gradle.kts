@@ -67,7 +67,6 @@ kotlin {
                 implementation(libs.mockk)
                 implementation(libs.mockk.agent.jvm)
                 implementation(libs.logback.classic)
-                implementation("org.powermock:powermock-reflect:1.6.1")
                 implementation("io.netty:netty-transport:4.1.91.Final")
                 implementation("io.netty:netty-codec-redis:4.1.99.Final")
             }
