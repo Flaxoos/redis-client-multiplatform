@@ -1,8 +1,5 @@
 jdk:
   - openjdk11
-before_install:
-  - echo "Creating gradle wrapper"
-  - ./gradlew wrapper
 install:
   - echo "Running gradle clean install"
   - ./gradlew clean install
