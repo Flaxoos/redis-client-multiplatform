@@ -6,4 +6,3 @@ before_install:
 install:
   - echo "Running gradle clean install"
   - ./gradlew clean install
-env:
