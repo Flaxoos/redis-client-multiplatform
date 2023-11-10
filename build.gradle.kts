@@ -1,10 +1,15 @@
 import org.gradle.jvm.tasks.Jar
+import java.net.URI
 
 plugins {
     kotlin("multiplatform") version "1.9.20"
     alias(libs.plugins.kotest)
     alias(libs.plugins.loggingCapabilities)
+    `maven-publish`
 }
+
+group = "io.github.flaxoos"
+version = "0.0.1-SNAPSHOT"
 
 kotlin {
     jvm {
@@ -82,3 +87,30 @@ loggingCapabilities {
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url =
+                URI(
+                    "https://maven.pkg.github.com/flaxoos/${
+                        project.findProperty("github.repository.name") ?: project.name
+                    }",
+                )
+            credentials {
+                username = gprUser
+                password = gprWriteToken
+            }
+        }
+    }
+}
+
+private val Project.gprWriteToken
+    get() = findProperty("gpr.write.key") as String? ?: System.getenv("GPR_WRITE_TOKEN")
+
+private val Project.gprReadToken
+    get() = findProperty("gpr.read.key") as String? ?: System.getenv("GPR_READ_TOKEN")
+
+private val Project.gprUser
+    get() = findProperty("gpr.user") as String? ?: System.getenv("GPR_USER")
