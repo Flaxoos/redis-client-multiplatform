@@ -106,6 +106,12 @@ publishing {
     }
 }
 
+val printVersion by tasks.creating  {
+    doLast {
+        println(project.version)
+    }
+}
+
 private val Project.gprWriteToken
     get() = findProperty("gpr.write.key") as String? ?: System.getenv("GPR_WRITE_TOKEN")
 
