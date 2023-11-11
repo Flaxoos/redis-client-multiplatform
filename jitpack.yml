@@ -1,5 +1,5 @@
 jdk:
   - openjdk11
 install:
-  - echo "Running gradle clean install"
-  - ./gradlew clean install
+  - echo "Running gradle clean build"
+  - ./gradlew clean build
