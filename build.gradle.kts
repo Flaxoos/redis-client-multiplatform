@@ -1,15 +1,19 @@
 import org.gradle.jvm.tasks.Jar
-import java.net.URI
+import org.jetbrains.dokka.gradle.AbstractDokkaTask
+import java.util.Base64
 
 plugins {
     kotlin("multiplatform") version "1.9.20"
     alias(libs.plugins.kotest)
     alias(libs.plugins.loggingCapabilities)
+    alias(libs.plugins.nexusPublish)
     `maven-publish`
+    signing
+    alias(libs.plugins.dokka)
 }
 
 group = "io.github.flaxoos"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.1"
 
 kotlin {
     jvm {
@@ -78,6 +82,9 @@ kotlin {
             }
         }
     }
+    targets.configureEach {
+        withSourcesJar(true)
+    }
 }
 
 loggingCapabilities {
@@ -88,35 +95,80 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
+val dokkaHtml = tasks.named<AbstractDokkaTask>("dokkaHtml")
+val dokkaJar = tasks.register<Jar>("dokkaJar") {
+    archiveClassifier.set("javadoc")
+    from(dokkaHtml.get().outputDirectory)
+}
+
 publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url =
-                URI(
-                    "https://maven.pkg.github.com/flaxoos/${
-                        project.findProperty("github.repository.name") ?: project.name
-                    }",
-                )
-            credentials {
-                username = gprUser
-                password = gprWriteToken
+    publications.withType<MavenPublication> {
+        artifact(dokkaJar)
+        pom {
+            name.set(project.name)
+            groupId = project.group.toString()
+            version = project.version.toString()
+            url.set("https://github.com/Flaxoos/redis-client-multiplatform")
+            inceptionYear.set("2023")
+
+            description = "Kotlin multiplatform redis client"
+
+            scm {
+                connection.set("scm:git:https://github.com/Flaxoos/redis-client-multiplatform.git")
+                developerConnection.set("scm:git:https://github.com/Flaxoos/redis-client-multiplatform.git")
+                url.set("https://github.com/Flaxoos/redis-client-multiplatform")
+            }
+
+            licenses {
+                license {
+                    name.set("The Apache License, Version 2.0")
+                    url.set("https://opensource.org/license/mit/")
+                }
+            }
+
+            developers {
+                developer {
+                    id.set("flaxoos")
+                    name.set("Ido Flax")
+                    email.set("idoflax@gmail.com")
+                }
             }
         }
     }
 }
 
-val printVersion by tasks.creating  {
-    doLast {
-        println(project.version)
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            username = ossrhUsername
+            password = ossrhPassword
+        }
     }
+}
+
+
+tasks.withType<AbstractPublishToMaven>().configureEach {
+    val signingTasks = tasks.withType<Sign>()
+    mustRunAfter(signingTasks)
+}
+signing {
+    useInMemoryPgpKeys(Base64.getDecoder().decode(signingKeyArmorBase64).decodeToString(), signingPassword)
+    sign(the<PublishingExtension>().publications)
 }
 
 private val Project.gprWriteToken
     get() = findProperty("gpr.write.key") as String? ?: System.getenv("GPR_WRITE_TOKEN")
-
 private val Project.gprReadToken
     get() = findProperty("gpr.read.key") as String? ?: System.getenv("GPR_READ_TOKEN")
-
 private val Project.gprUser
     get() = findProperty("gpr.user") as String? ?: System.getenv("GPR_USER")
+private val Project.ossrhUsername
+    get() = findProperty("ossrh.username") as String? ?: System.getenv("OSSRH_USERNAME")
+private val Project.ossrhPassword
+    get() = findProperty("ossrh.password") as String? ?: System.getenv("OSSRH_PASSWORD")
+val Project.signingKeyArmorBase64: String
+    get() = findProperty("signing.key.armor.base64") as String? ?: System.getenv("SIGNING_KEY_ARMOR_BASE64")
+val Project.signingPassword: String
+    get() = findProperty("signing.password") as String? ?: System.getenv("SIGNING_PASSWORD")
