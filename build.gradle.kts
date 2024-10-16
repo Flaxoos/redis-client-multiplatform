@@ -13,25 +13,11 @@ plugins {
 }
 
 group = "io.github.flaxoos"
-version = "0.0.1"
+version = properties["version"].toString()
 
 kotlin {
     jvm {
         jvmToolchain(11)
-        project.tasks.named("jvmJar", Jar::class).configure {
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-            from(
-                listOf(
-                    project.configurations["jvmCompileClasspath"],
-                    project.configurations["jvmRuntimeClasspath"],
-                ).map { config ->
-                    config.map {
-                        if (it.isDirectory) it
-                        else project.zipTree(it)
-                    }
-                },
-            )
-        }
     }
     val nativeTarget = linuxX64("native")
     nativeTarget.apply {
