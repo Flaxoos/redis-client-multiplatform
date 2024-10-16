@@ -31,7 +31,6 @@ kotlin {
                 }
             }
         }
-
     }
     sourceSets {
         commonMain {
@@ -82,10 +81,11 @@ tasks.withType<Test>().configureEach {
 }
 
 val dokkaHtml = tasks.named<AbstractDokkaTask>("dokkaHtml")
-val dokkaJar = tasks.register<Jar>("dokkaJar") {
-    archiveClassifier.set("javadoc")
-    from(dokkaHtml.get().outputDirectory)
-}
+val dokkaJar =
+    tasks.register<Jar>("dokkaJar") {
+        archiveClassifier.set("javadoc")
+        from(dokkaHtml.get().outputDirectory)
+    }
 
 publishing {
     publications.withType<MavenPublication> {
@@ -133,7 +133,6 @@ nexusPublishing {
         }
     }
 }
-
 
 tasks.withType<AbstractPublishToMaven>().configureEach {
     val signingTasks = tasks.withType<Sign>()
