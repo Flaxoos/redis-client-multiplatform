@@ -31,7 +31,6 @@ kotlin {
                 }
             }
         }
-
     }
     sourceSets {
         commonMain {
@@ -63,8 +62,6 @@ kotlin {
                 implementation(libs.mockk.agent.jvm)
                 implementation(libs.logback.classic)
                 implementation("org.powermock:powermock-reflect:1.6.1")
-                implementation("io.netty:netty-transport:4.1.91.Final")
-                implementation("io.netty:netty-codec-redis:4.1.99.Final")
             }
         }
     }
@@ -82,10 +79,11 @@ tasks.withType<Test>().configureEach {
 }
 
 val dokkaHtml = tasks.named<AbstractDokkaTask>("dokkaHtml")
-val dokkaJar = tasks.register<Jar>("dokkaJar") {
-    archiveClassifier.set("javadoc")
-    from(dokkaHtml.get().outputDirectory)
-}
+val dokkaJar =
+    tasks.register<Jar>("dokkaJar") {
+        archiveClassifier.set("javadoc")
+        from(dokkaHtml.get().outputDirectory)
+    }
 
 publishing {
     publications.withType<MavenPublication> {
@@ -133,7 +131,6 @@ nexusPublishing {
         }
     }
 }
-
 
 tasks.withType<AbstractPublishToMaven>().configureEach {
     val signingTasks = tasks.withType<Sign>()

@@ -57,7 +57,7 @@ avro4k = "0.41.0"
 avro = "1.11.2"
 
 # Redis
-kreds = "0.9.0"
+kreds = "0.9.1"
 
 # Documentation
 dokka = "1.9.10"
